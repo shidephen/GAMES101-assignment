@@ -39,7 +39,7 @@ struct AppConfig {
 };
 
 class Application : public Renderer {
- public:
+public:
   Application(AppConfig config);
   ~Application();
 
@@ -55,7 +55,7 @@ class Application : public Renderer {
   // void scroll_event(float offset_x, float offset_y);
   // void mouse_event(int key, int event, unsigned char mods);
 
- private:
+private:
   AppConfig config;
 
   Rope *ropeEuler;
@@ -64,8 +64,8 @@ class Application : public Renderer {
   size_t screen_width;
   size_t screen_height;
 
-};  // class Application
+}; // class Application
 
-}  // namespace CGL
+} // namespace CGL
 
-#endif  // CGL_APPLICATION_H
+#endif // CGL_APPLICATION_H

@@ -26,8 +26,8 @@ void Application::init() {
   // Create two ropes
   ropeEuler = new Rope(Vector2D(0, 200), Vector2D(-400, 200), config.num_nodes,
                        config.mass, config.ks, {0});
-  ropeVerlet = new Rope(Vector2D(0, -200), Vector2D(-400, -200),
-                        config.num_nodes, config.mass, config.ks, {0});
+  ropeVerlet = new Rope(Vector2D(0, 200), Vector2D(-400, 200), config.num_nodes,
+                        config.mass, config.ks, {0});
 }
 
 void Application::render() {
@@ -86,14 +86,14 @@ void Application::resize(size_t w, size_t h) {
 
 void Application::keyboard_event(int key, int event, unsigned char mods) {
   switch (key) {
-    case '-':
-      if (config.steps_per_frame > 1) {
-        config.steps_per_frame /= 2;
-      }
-      break;
-    case '=':
-      config.steps_per_frame *= 2;
-      break;
+  case '-':
+    if (config.steps_per_frame > 1) {
+      config.steps_per_frame /= 2;
+    }
+    break;
+  case '=':
+    config.steps_per_frame *= 2;
+    break;
   }
 }
 
@@ -105,4 +105,4 @@ string Application::info() {
 
   return steps.str();
 }
-}  // namespace CGL
+} // namespace CGL

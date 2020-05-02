@@ -45,15 +45,31 @@ Rope::Rope(Vector2D start, Vector2D end, int num_nodes, float node_mass,
 void Rope::simulateEuler(float delta_t, Vector2D gravity) {
   for (auto &s : springs) {
     // TODO (Part 2): Use Hooke's law to calculate the force on a node
-    double l = (s->m1->position - s->m2->position).norm() - s->rest_length;
-    
+    Vector2D a2b = s->m2->position - s->m1->position;
+    double l = a2b.norm() - s->rest_length;
+    Vector2D f = s->k * a2b.unit() * l; // Fa2b
+    s->m1->forces += f;
+    s->m2->forces -= f; // Fb2a
+
+    // Damping
+    // Vector2D v_a2b = s->m2->velocity - s->m1->velocity;
+    // Vector2D damp_b = -damping_factor * dot(a2b.unit(), v_a2b) * a2b.unit();
+
+    // s->m2->forces += damp_b;
   }
 
   for (auto &m : masses) {
     if (!m->pinned) {
       // TODO (Part 2): Add the force due to gravity, then compute the new
       // velocity and position
+      m->forces += gravity;
+      Vector2D acc = m->forces / m->mass;
+      Vector2D vt_1 = m->velocity + acc * delta_t;
+      m->last_position = m->position;
+      // m->position = m->last_position + m->velocity * delta_t;
+      m->position = m->last_position + vt_1 * delta_t;
 
+      m->velocity = vt_1;
       // TODO (Part 2): Add global damping
     }
 
@@ -66,12 +82,24 @@ void Rope::simulateVerlet(float delta_t, Vector2D gravity) {
   for (auto &s : springs) {
     // TODO (Part 3): Simulate one timestep of the rope using explicit Verlet
     // （solving constraints)
+
+    Vector2D a2b = s->m2->position - s->m1->position;
+    double l = a2b.norm() - s->rest_length;
+    Vector2D f = s->k * a2b.unit() * l; // Fa2b
+    s->m1->forces += f;
+    s->m2->forces -= f; // Fb2a
   }
 
   for (auto &m : masses) {
     if (!m->pinned) {
       Vector2D temp_position = m->position;
       // TODO (Part 3.1): Set the new position of the rope mass
+      m->forces += gravity;
+      Vector2D acc = m->forces / m->mass;
+
+      m->position =
+          2 * temp_position - m->last_position + acc * delta_t * delta_t;
+      m->last_position = temp_position;
 
       // TODO (Part 4): Add global Verlet damping
     }
@@ -88,4 +116,4 @@ Rope::~Rope() {
   }
 }
 
-}  // namespace CGL
+} // namespace CGL
