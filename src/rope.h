@@ -24,7 +24,7 @@ public:
   vector<Mass *> masses;
   vector<Spring *> springs;
 
-  double damping_factor = 1;
+  double damping_factor = 0.00005;
 }; // struct Rope
 } // namespace CGL
 #endif /* ROPE_H */

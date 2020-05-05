@@ -47,7 +47,9 @@ void Rope::simulateEuler(float delta_t, Vector2D gravity) {
     // TODO (Part 2): Use Hooke's law to calculate the force on a node
     Vector2D a2b = s->m2->position - s->m1->position;
     double l = a2b.norm() - s->rest_length;
+
     Vector2D f = s->k * a2b.unit() * l; // Fa2b
+
     s->m1->forces += f;
     s->m2->forces -= f; // Fb2a
 
@@ -56,6 +58,7 @@ void Rope::simulateEuler(float delta_t, Vector2D gravity) {
     // Vector2D damp_b = -damping_factor * dot(a2b.unit(), v_a2b) * a2b.unit();
 
     // s->m2->forces += damp_b;
+    // s->m1->forces -= damp_b;
   }
 
   for (auto &m : masses) {
@@ -64,12 +67,13 @@ void Rope::simulateEuler(float delta_t, Vector2D gravity) {
       // velocity and position
       m->forces += gravity;
       Vector2D acc = m->forces / m->mass;
-      Vector2D vt_1 = m->velocity + acc * delta_t;
-      m->last_position = m->position;
-      // m->position = m->last_position + m->velocity * delta_t;
-      m->position = m->last_position + vt_1 * delta_t;
+      Vector2D vt = m->velocity;
 
-      m->velocity = vt_1;
+      m->last_position = m->position;
+
+      m->velocity = m->velocity + acc * delta_t;
+
+      m->position = m->last_position + m->velocity * delta_t;
       // TODO (Part 2): Add global damping
     }
 
@@ -84,24 +88,31 @@ void Rope::simulateVerlet(float delta_t, Vector2D gravity) {
     // （solving constraints)
 
     Vector2D a2b = s->m2->position - s->m1->position;
+    Vector2D unit = a2b.unit();
     double l = a2b.norm() - s->rest_length;
-    Vector2D f = s->k * a2b.unit() * l; // Fa2b
-    s->m1->forces += f;
-    s->m2->forces -= f; // Fb2a
+
+    if (!s->m1->pinned) {
+      s->m1->position += 0.5 * l * unit;
+    }
+    if (!s->m2->pinned) {
+      s->m2->position -= 0.5 * l * unit;
+    }
   }
 
   for (auto &m : masses) {
     if (!m->pinned) {
       Vector2D temp_position = m->position;
       // TODO (Part 3.1): Set the new position of the rope mass
-      m->forces += gravity;
-      Vector2D acc = m->forces / m->mass;
+      Vector2D acc = gravity / m->mass;
 
       m->position =
           2 * temp_position - m->last_position + acc * delta_t * delta_t;
-      m->last_position = temp_position;
 
       // TODO (Part 4): Add global Verlet damping
+
+      m->position -= damping_factor * (temp_position - m->last_position);
+
+      m->last_position = temp_position;
     }
   }
 }
