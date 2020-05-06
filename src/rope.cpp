@@ -52,13 +52,6 @@ void Rope::simulateEuler(float delta_t, Vector2D gravity) {
 
     s->m1->forces += f;
     s->m2->forces -= f; // Fb2a
-
-    // Damping
-    // Vector2D v_a2b = s->m2->velocity - s->m1->velocity;
-    // Vector2D damp_b = -damping_factor * dot(a2b.unit(), v_a2b) * a2b.unit();
-
-    // s->m2->forces += damp_b;
-    // s->m1->forces -= damp_b;
   }
 
   for (auto &m : masses) {
@@ -66,8 +59,9 @@ void Rope::simulateEuler(float delta_t, Vector2D gravity) {
       // TODO (Part 2): Add the force due to gravity, then compute the new
       // velocity and position
       m->forces += gravity;
+      m->forces -= 0.01 * m->velocity;
+
       Vector2D acc = m->forces / m->mass;
-      Vector2D vt = m->velocity;
 
       m->last_position = m->position;
 
@@ -91,12 +85,15 @@ void Rope::simulateVerlet(float delta_t, Vector2D gravity) {
     Vector2D unit = a2b.unit();
     double l = a2b.norm() - s->rest_length;
 
-    if (!s->m1->pinned) {
+    if (!s->m1->pinned && s->m2->pinned) {
+      s->m1->position += l * unit;
+    } else if(!s->m2->pinned && s->m1->pinned) {
+      s->m2->position -= l * unit;
+    } else {
       s->m1->position += 0.5 * l * unit;
-    }
-    if (!s->m2->pinned) {
       s->m2->position -= 0.5 * l * unit;
     }
+
   }
 
   for (auto &m : masses) {
